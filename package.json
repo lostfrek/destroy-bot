@@ -1,0 +1,19 @@
+{
+  "name": "majestic-orlando-family-bot",
+  "version": "1.914.0208",
+  "description": "Discord bot for a GTA 5 RP family on Majestic Orlando.",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/index.js",
+    "register": "node src/register-commands.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.27.0",
+    "dotenv": "^16.4.5",
+    "mysql2": "^3.23.1"
+  },
+  "engines": {
+    "node": ">=20.9.0"
+  }
+}
