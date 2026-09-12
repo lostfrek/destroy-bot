@@ -2511,7 +2511,8 @@ async function handleInteraction(interaction) {
       await interaction.reply({
         content: successMessage(
           `Понг! Задержка ответа: **${roundTrip} мс**, WebSocket: **${wsPing >= 0 ? wsPing : "—"} мс**.`
-        )
+        ),
+        flags: MessageFlags.Ephemeral
       });
       return;
     }
