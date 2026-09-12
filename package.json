@@ -6,7 +6,8 @@
   "type": "commonjs",
   "scripts": {
     "start": "node src/index.js",
-    "register": "node src/register-commands.js"
+    "register": "node src/register-commands.js",
+    "migrate-emojis": "node src/migrate-application-emojis.js"
   },
   "dependencies": {
     "discord.js": "^14.27.0",
