@@ -5,6 +5,7 @@ const path = require("node:path");
 const crypto = require("node:crypto");
 const {
   ActionRowBuilder,
+  ActivityType,
   ButtonBuilder,
   ButtonStyle,
   ChannelType,
@@ -213,7 +214,10 @@ const client = new Client({
     GatewayIntentBits.GuildMessageReactions
   ],
   partials: [Partials.Channel, Partials.Message, Partials.Reaction, Partials.User],
-  presence: { status: "online" }
+  presence: {
+    status: "online",
+    activities: [{ name: "Custom Status", state: "reevun.app", type: ActivityType.Custom }]
+  }
 });
 
 const APPLICATION_REJECTION_COOLDOWN_MS = 10 * 24 * 60 * 60 * 1000;
