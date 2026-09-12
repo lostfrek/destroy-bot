@@ -28,6 +28,14 @@ const commands = [
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
 ].map((command) => command.toJSON());
 
+// Глобальная (а не гильдийная) команда: помимо самой команды, наличие хотя бы одной
+// глобальной slash-команды — единственный способ получить у бота значок "Supports Commands".
+const globalCommands = [
+  new SlashCommandBuilder()
+    .setName("ping")
+    .setDescription("Проверить, что бот на связи, и посмотреть задержку.")
+].map((command) => command.toJSON());
+
 async function main() {
   const { DISCORD_TOKEN, DISCORD_CLIENT_ID, DISCORD_GUILD_ID } = process.env;
 
@@ -39,8 +47,11 @@ async function main() {
   await rest.put(Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID), {
     body: commands
   });
+  await rest.put(Routes.applicationCommands(DISCORD_CLIENT_ID), {
+    body: globalCommands
+  });
 
-  console.log(`Зарегистрировано slash-команд: ${commands.length}.`);
+  console.log(`Зарегистрировано гильдийных slash-команд: ${commands.length}, глобальных: ${globalCommands.length}.`);
 }
 
 if (require.main === module) {
@@ -50,4 +61,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { commands };
+module.exports = { commands, globalCommands };
