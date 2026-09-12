@@ -29,7 +29,7 @@ const {
   TextInputBuilder,
   TextInputStyle
 } = require("discord.js");
-const { commands: slashCommandDefinitions } = require("./register-commands");
+const { commands: slashCommandDefinitions, globalCommands: globalSlashCommandDefinitions } = require("./register-commands");
 const {
   closeStorage,
   deleteUserProfile,
@@ -2067,7 +2067,12 @@ async function registerSlashCommands() {
   await rest.put(Routes.applicationGuildCommands(DISCORD_CLIENT_ID, DISCORD_GUILD_ID), {
     body: slashCommandDefinitions
   });
-  console.log(`Slash-команды зарегистрированы автоматически: ${slashCommandDefinitions.length}.`);
+  await rest.put(Routes.applicationCommands(DISCORD_CLIENT_ID), {
+    body: globalSlashCommandDefinitions
+  });
+  console.log(
+    `Slash-команды зарегистрированы автоматически: ${slashCommandDefinitions.length} гильдийных, ${globalSlashCommandDefinitions.length} глобальных.`
+  );
 }
 
 async function handleClientReady(readyClient) {
@@ -2499,6 +2504,17 @@ async function handleInteraction(interaction) {
 
   if (interaction.isChatInputCommand()) {
     const commandName = interaction.commandName;
+
+    if (commandName === "ping") {
+      const roundTrip = Date.now() - interaction.createdTimestamp;
+      const wsPing = Math.round(interaction.client.ws.ping);
+      await interaction.reply({
+        content: successMessage(
+          `Понг! Задержка ответа: **${roundTrip} мс**, WebSocket: **${wsPing >= 0 ? wsPing : "—"} мс**.`
+        )
+      });
+      return;
+    }
 
     if (["move", "capts"].includes(commandName) && !isLeadership(interaction.member)) {
       await interaction.reply({ content: noticeMessage("Эту команду может использовать только руководство фамы."), flags: MessageFlags.Ephemeral });
