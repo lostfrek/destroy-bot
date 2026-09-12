@@ -2087,22 +2087,43 @@ async function handleClientReady(readyClient) {
   const guildId = process.env.DISCORD_GUILD_ID;
   const guild = guildId ? await readyClient.guilds.fetch(guildId).catch(() => null) : null;
   if (guild) {
-    await processExpiredGameAfkSessions(readyClient);
+    await processExpiredGameAfkSessions(readyClient).catch((error) => {
+      console.error("Не удалось обработать просроченные AFK-сессии при старте:", error);
+    });
+
     const applicationParent = await guild.channels.fetch(APPLICATION_PANEL_CHANNEL_ID).catch(() => null);
     if (applicationParent?.isTextBased()) {
-      await ensureTicketReviewerParentAccess(applicationParent, config.leadershipRoleIds);
-      await refreshApplicationPanel(guild);
+      await ensureTicketReviewerParentAccess(applicationParent, config.leadershipRoleIds).catch((error) => {
+        console.error("Не удалось выдать доступ к панели заявок:", error);
+      });
+      await refreshApplicationPanel(guild).catch((error) => {
+        console.error("Не удалось обновить панель заявок:", error);
+      });
+    } else {
+      console.error(`Канал панели заявок (${APPLICATION_PANEL_CHANNEL_ID}) недоступен: проверьте права бота и ID канала.`);
     }
-    await refreshStaticPanel(guild, SUPPORT_PANEL_CHANNEL_ID, "support:create", buildSupportPanel);
-    await refreshStaticPanel(guild, ADMIN_PANEL_CHANNEL_ID, "admin:warn", buildAdminPanel);
+
+    await refreshStaticPanel(guild, SUPPORT_PANEL_CHANNEL_ID, "support:create", buildSupportPanel).catch((error) => {
+      console.error("Не удалось обновить панель поддержки:", error);
+    });
+    await refreshStaticPanel(guild, ADMIN_PANEL_CHANNEL_ID, "admin:warn", buildAdminPanel).catch((error) => {
+      console.error("Не удалось обновить админ-панель:", error);
+    });
     await refreshStaticPanel(
       guild,
       CAPT_REPLAY_CHANNEL_ID,
       "capt_replay:upload",
       () => buildCaptReplayPanel(getCaptReplayWindow())
-    );
-    await syncGuildStateFromRoles(guild);
-    await synchronizeStoredTicketThreads(guild);
+    ).catch((error) => {
+      console.error("Не удалось обновить панель приёма откатов с капта:", error);
+    });
+
+    await syncGuildStateFromRoles(guild).catch((error) => {
+      console.error("Не удалось синхронизировать состояние по ролям:", error);
+    });
+    await synchronizeStoredTicketThreads(guild).catch((error) => {
+      console.error("Не удалось синхронизировать ветки обращений:", error);
+    });
   }
   const gameAfkSweep = setInterval(() => {
     processExpiredGameAfkSessions(readyClient).catch((error) => {
